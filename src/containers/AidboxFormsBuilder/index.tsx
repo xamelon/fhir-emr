@@ -11,9 +11,14 @@ import { S } from './styles';
 
 const profile = 'https://emr-core.beda.software/StructureDefinition/fhir-emr-questionnaire';
 
+
+
 export function AidboxFormsBuilder() {
     const params = useParams();
     const [id, setId] = useState<string | undefined>(params.id);
+    
+    console.log("id: ", id);
+
     const builder = useRef<any>(null);
     useEffect(() => {
         if (builder.current) {
@@ -29,6 +34,8 @@ export function AidboxFormsBuilder() {
                     setId(response.data.id);
                 }
             });
+
+            
             const authorization = axiosInstance.defaults.headers.Authorization;
             builder.current.onFetch = async (url: string, init: RequestInit) => {
                 init.headers = {
@@ -47,11 +54,25 @@ export function AidboxFormsBuilder() {
                         q.subjectType = ['Patient'];
                         init.body = JSON.stringify(body);
                     }
-                }
+                } 
+
                 return fetch(config.baseURL + url, init);
             };
         }
-    }, [builder]);
+    }, [builder])
+
+    
+
+    const builderConfig = {builder: {
+            "custom-renderers": [
+                {name: "base-questionnaire-response-form",
+                 title: "Beda EMR",
+                 source: "http://localhost:3000/base-questionnaire-response-form-webcomponent.iife.js",
+                default: true
+                }
+            ]
+        }
+    };
 
     return (
         <S.Container>
@@ -59,6 +80,7 @@ export function AidboxFormsBuilder() {
                 {/* @ts-ignore */}
                 <aidbox-form-builder
                     ref={builder}
+                    config={JSON.stringify(builderConfig)}
                     form-id={id}
                     style={{
                         height: '100%',
